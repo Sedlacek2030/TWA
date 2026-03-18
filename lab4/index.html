@@ -11,6 +11,8 @@
     <input type="number" id="productId" placeholder="Product ID">
     <input type="text" id="productName" placeholder="Product Name">
     <input type="number" id="productPrice" placeholder="Product Price">
+    <input type="number" id="productWeight" placeholder="Product Weight">
+    <input type="text" id="productDescription" placeholder="Product Description">
 
     <button onclick="addProduct()">Add Product</button>
     <button onclick="updateProduct()">Update Product</button>
@@ -44,8 +46,10 @@
             const id = document.getElementById("productId").value;
             const name = document.getElementById("productName").value;
             const price = document.getElementById("productPrice").value;
+            const weight = document.getElementById("productWeight").value;
+            const description = document.getElementById("productDescription").value;
 
-            const product = { id, name, price };
+            const product = { id, name, price, weight, description };
 
             try {
                 await fetch(API_URL, {
@@ -63,8 +67,10 @@
             const id = document.getElementById("productId").value;
             const name = document.getElementById("productName").value;
             const price = document.getElementById("productPrice").value;
+            const weight = document.getElementById("productWeight").value;
+            const description = document.getElementById("productDescription").value;
 
-            const product = { id, name, price };
+            const product = { id, name, price, weight, description };
 
             try {
                 await fetch(`${API_URL}/${id}`, {

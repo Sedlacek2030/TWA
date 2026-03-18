@@ -2,11 +2,15 @@
   {
     "id": 1,
     "name": " Monnitor",
-    "price": 333
+    "price": 333,
+    "weight": 2.5,
+    "description": "A high-quality monitor with excellent resolution and color accuracy."
   },
   {
-    "id": 1,
-    "name": " Monnitor",
-    "price": 333
+    "id": 2,
+    "name": " Mouse",
+    "price": 10,
+    "weight": 1.0,
+    "description": "A ergonomic mouse with excellent precision and comfort."
   }
 ]

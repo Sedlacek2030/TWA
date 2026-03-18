@@ -49,7 +49,9 @@ function sanitizeProduct(product) {
    return {
        id: parseInt(product.id), // Ensure ID is integer
        name: product.name,
-       price: parseFloat(product.price) // Ensure price is a number (float or integer)
+       price: parseFloat(product.price), // Ensure price is a number (float or integer)
+       weight: product.weight !== undefined ? parseFloat(product.weight) : undefined,
+       description: product.description || undefined
    };
 }
 
@@ -69,6 +71,14 @@ app.get("/products", (req, res) => {
 // POST - Add a new product (ensures ID and price are numbers)
 app.post("/products", (req, res) => {
    let product = sanitizeProduct(req.body);
+   
+   // Check if ID already exists
+   const idExists = products.some(p => p.id === product.id);
+   if (idExists) {
+       res.status(400).json({ error: `Product with id ${product.id} already exists.` });
+       return;
+   }
+   
    products.push(product);
    saveProducts(); // Save to disk
    console.log("POST request: Added product", product);
