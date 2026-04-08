@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   try {
     const { address, items } = req.body;
 
-    const firebaseUrl = process.env.https://twaprojekt-6aab2-default-rtdb.europe-west1.firebasedatabase.app/+'/orders.json';
+    const firebaseUrl = process.env.FIREBASE_PROJECT_ID+'/orders.json';
 
     const response = await fetch(firebaseUrl, {
       method: 'POST',
