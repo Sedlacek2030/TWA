@@ -1,125 +1,121 @@
-// PIE CHART
-new Chart(document.getElementById('pieChart'), {
-  type: 'pie',
-  data: {
-    labels: ['Coffee', 'Tea', 'Juice'],
-    datasets: [{
-      data: [45, 25, 30],
-      backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56']
-    }]
-  }
-});
+window.onload = function () {
+    const ctx = document.getElementById('myPieChart').getContext('2d');
 
-// BAR CHART
-new Chart(document.getElementById('barChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Europe', 'Asia', 'America'],
-    datasets: [{
-      label: 'Sales',
-      data: [300, 500, 400],
-      backgroundColor: '#42a5f5'
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      y: { beginAtZero: true }
-    }
-  }
-});
+    const outerData = [12, 19, 3]; // původní 3 barvy
+    const innerData = [4, 3, 3, 2]; // kávy uvnitř
 
-// LINE CHART
-new Chart(document.getElementById('lineChart'), {
-  type: 'line',
-  data: {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-    datasets: [{
-      label: 'Visitors',
-      data: [200, 400, 300, 500, 450],
-      borderColor: '#66bb6a',
-      fill: false
-    }]
-  }
-});
+    const outerLabels = ['Červená', 'Modrá', 'Žlutá'];
+    const innerLabels = ['Espresso', 'Lungo', 'Americano', 'Latte'];
 
-// D3 NETWORK GRAPH
-const svg = d3.select("#networkGraph");
-const width = +svg.attr("width");
-const height = +svg.attr("height");
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [...outerLabels, ...innerLabels],
+            datasets: [
+                {
+                    label: 'Hlavní barvy',
+                    data: outerData,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)', // Červená
+                        'rgba(54, 162, 235, 0.8)', // Modrá
+                        'rgba(255, 205, 86, 0.8)'  // Žlutá
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    radius: '100%',
+                    cutout: '60%'
+                },
+                {
+                    label: 'Druhy kávy',
+                    data: innerData,
+                    backgroundColor: [
+                        '#5D4037', // Espresso
+                        '#795548', // Lungo
+                        '#8D6E63', // Americano
+                        '#A1887F'  // Latte
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    radius: '58%',
+                    cutout: '25%'
+                }
+            ]
+        },
+        plugins: [ChartDataLabels],
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: 20
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Přehled barev a druhů kávy',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    position: 'right',
+                    labels: {
+                        generateLabels(chart) {
+                            const datasets = chart.data.datasets;
+                            const result = [];
 
-const nodes = [
-  { id: "Alice" },
-  { id: "Bob" },
-  { id: "Carol" },
-  { id: "Dave" }
-];
+                            datasets.forEach((dataset, datasetIndex) => {
+                                dataset.data.forEach((value, i) => {
+                                    const total = dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
 
-const links = [
-  { source: "Alice", target: "Bob" },
-  { source: "Alice", target: "Carol" },
-  { source: "Bob", target: "Dave" }
-];
+                                    const labelText =
+                                        datasetIndex === 0
+                                            ? `${outerLabels[i]} (${value}, ${percentage}%)`
+                                            : `${innerLabels[i]} (${value}, ${percentage}%)`;
 
-const simulation = d3.forceSimulation(nodes)
-  .force("link", d3.forceLink(links).id(d => d.id).distance(100))
-  .force("charge", d3.forceManyBody().strength(-200))
-  .force("center", d3.forceCenter(width / 2, height / 2));
+                                    result.push({
+                                        text: labelText,
+                                        fillStyle: dataset.backgroundColor[i],
+                                        strokeStyle: dataset.backgroundColor[i],
+                                        lineWidth: 1,
+                                        hidden: false,
+                                        index: i,
+                                        datasetIndex: datasetIndex
+                                    });
+                                });
+                            });
 
-const link = svg.append("g")
-  .selectAll("line")
-  .data(links)
-  .enter().append("line")
-  .attr("stroke", "#aaa");
+                            return result;
+                        }
+                    }
+                },
+                datalabels: {
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 12
+                    },
+                    formatter: (value, context) => {
+                        const dataset = context.chart.data.datasets[context.datasetIndex];
+                        const total = dataset.data.reduce((acc, val) => acc + val, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return percentage + '%';
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const dataset = context.dataset;
+                            const total = dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
 
-const node = svg.append("g")
-  .selectAll("circle")
-  .data(nodes)
-  .enter().append("circle")
-  .attr("r", 10)
-  .attr("fill", "#2196f3")
-  .call(d3.drag()
-    .on("start", dragstarted)
-    .on("drag", dragged)
-    .on("end", dragended));
-
-const label = svg.append("g")
-  .selectAll("text")
-  .data(nodes)
-  .enter().append("text")
-  .text(d => d.id)
-  .attr("font-size", 12)
-  .attr("dy", -15);
-
-simulation.on("tick", () => {
-  link
-    .attr("x1", d => d.source.x)
-    .attr("y1", d => d.source.y)
-    .attr("x2", d => d.target.x)
-    .attr("y2", d => d.target.y);
-
-  node
-    .attr("cx", d => d.x)
-    .attr("cy", d => d.y);
-
-  label
-    .attr("x", d => d.x)
-    .attr("y", d => d.y);
-});
-
-function dragstarted(event, d) {
-  if (!event.active) simulation.alphaTarget(0.3).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function dragged(event, d) {
-  d.fx = event.x;
-  d.fy = event.y;
-}
-
-function dragended(event, d) {
-  if (!event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
-}
+                            return `${context.label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+};
