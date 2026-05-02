@@ -1,49 +1,34 @@
-const firebaseUrl = "https://semestralka-9a2bd-default-rtdb.europe-west1.firebasedatabase.app/"; // Replace with your Firebase DB URL.
-const firebaseAuthToken = ""; // Optional: Firebase REST auth token if your rules require it.
-let validUsers = [];
-let userLoadError = false;
+const backendUrl = window.location.origin;
+let token = null;
 
-const baseUrl = firebaseUrl.endsWith("/") ? firebaseUrl : firebaseUrl + "/";
 const statusEl = document.getElementById("status");
 const listEl = document.getElementById("list");
-const firebaseUrlEl = document.getElementById("firebase-url");
+const backendUrlEl = document.getElementById("backend-url");
 const loginSection = document.getElementById("login-section");
 const appSection = document.getElementById("app");
 const loginForm = document.getElementById("login-form");
 const addPoiBtn = document.getElementById("add-poi-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
+backendUrlEl.textContent = backendUrl;
+
 let map = null;
 let markersLayer = null;
 let editingKey = null;
 let poisByKey = {};
-
-firebaseUrlEl.textContent = baseUrl;
 
 function setStatus(text, isError = false) {
     statusEl.textContent = text;
     statusEl.style.color = isError ? "#b00" : "#080";
 }
 
-function buildFetchUrl(path) {
-    if (!firebaseAuthToken) return `${baseUrl}${path}`;
-    return `${baseUrl}${path}?auth=${encodeURIComponent(firebaseAuthToken)}`;
+function buildApiUrl(path) {
+    const trimmed = path.startsWith("/") ? path.slice(1) : path;
+    return `${backendUrl}/${trimmed}`;
 }
 
-async function loadUsers() {
-    try {
-        const res = await fetch("users.json");
-        if (!res.ok) throw new Error(`users.json returned ${res.status}`);
-        const data = await res.json();
-        if (!Array.isArray(data)) throw new Error("users.json must contain an array");
-        validUsers = data
-            .filter(u => u && typeof u.username === "string" && typeof u.password === "string")
-            .map(u => ({ username: u.username, password: u.password }));
-        if (validUsers.length === 0) throw new Error("users.json contains no valid users");
-    } catch (err) {
-        userLoadError = true;
-        setStatus(`Unable to load users.json: ${err.message}`, true);
-    }
+function getAuthHeaders() {
+    return token ? { "Content-Type": "application/json", "x-token": token } : { "Content-Type": "application/json" };
 }
 
 function initMap() {
@@ -62,16 +47,18 @@ async function loadPOIs() {
     setStatus("Loading POIs...");
 
     try {
-        const res = await fetch(buildFetchUrl("pois.json"));
+        const res = await fetch(buildApiUrl("api/pois"), {
+            headers: getAuthHeaders()
+        });
         if (!res.ok) {
-            throw new Error(`Firebase returned ${res.status}`);
+            throw new Error(`backend returned ${res.status}`);
         }
 
         const data = await res.json();
         renderPOIs(data);
-        setStatus("Loaded POIs from Firebase.");
+        setStatus("Loaded POIs from backend.");
     } catch (err) {
-        setStatus(`Unable to load Firebase POIs: ${err.message}`, true);
+        setStatus(`Unable to load POIs: ${err.message}`, true);
         listEl.innerHTML = "";
     }
 }
@@ -99,9 +86,9 @@ function renderPOIs(data) {
     listEl.innerHTML = "";
     markersLayer.clearLayers();
 
-    const entries = data == null ? [] : Array.isArray(data)
-        ? data.map((poi, index) => ({ ...poi, _key: String(index) }))
-        : Object.entries(data).map(([key, poi]) => ({ ...poi, _key: key }));
+    const entries = Array.isArray(data)
+        ? data.map((poi) => ({ ...poi, _key: String(poi.id) }))
+        : [];
     if (entries.length === 0) {
         listEl.textContent = "No POIs found.";
         return;
@@ -165,18 +152,18 @@ async function addPoi() {
     }
 
     const poi = { name, lat, lon, affiliation };
-    const method = editingKey ? "PATCH" : "POST";
-    const endpoint = editingKey ? `pois/${editingKey}.json` : "pois.json";
+    const method = editingKey ? "PUT" : "POST";
+    const endpoint = editingKey ? `api/pois/${editingKey}` : "api/pois";
     setStatus(editingKey ? "Updating POI..." : "Saving POI...");
 
     try {
-        const res = await fetch(buildFetchUrl(endpoint), {
+        const res = await fetch(buildApiUrl(endpoint), {
             method,
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders(),
             body: JSON.stringify(poi)
         });
 
-        if (!res.ok) throw new Error(`Firebase returned ${res.status}`);
+        if (!res.ok) throw new Error(`backend returned ${res.status}`);
 
         const wasEditing = Boolean(editingKey);
         clearEditState();
@@ -229,38 +216,43 @@ function showApp() {
     loadPOIs();
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
     const username = document.getElementById("login-user").value.trim();
     const password = document.getElementById("login-pass").value;
 
-    if (userLoadError) {
-        setStatus("Cannot log in until users.json is loaded successfully.", true);
-        return;
-    }
+    try {
+        const res = await fetch(`${backendUrl}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
 
-    const isValid = validUsers.some(user => user.username === username && user.password === password);
-    if (isValid) {
-        setStatus("Login successful.");
-        showApp();
-    } else {
-        setStatus("Invalid login credentials.", true);
+        const data = await res.json();
+        if (res.ok && data.token) {
+            token = data.token;
+            setStatus("Login successful.");
+            showApp();
+        } else {
+            setStatus(data.error || "Invalid login credentials.", true);
+        }
+    } catch (err) {
+        setStatus(`Login failed: ${err.message}`, true);
     }
 }
 
 loginForm.addEventListener("submit", handleLogin);
-
-loadUsers();
 
 async function deletePoi(key) {
     hideAllActionMenus();
     if (!confirm("Delete this POI?")) return;
 
     try {
-        const res = await fetch(buildFetchUrl(`pois/${key}.json`), {
-            method: "DELETE"
+        const res = await fetch(buildApiUrl(`api/pois/${key}`), {
+            method: "DELETE",
+            headers: getAuthHeaders()
         });
-        if (!res.ok) throw new Error(`Firebase returned ${res.status}`);
+        if (!res.ok) throw new Error(`backend returned ${res.status}`);
 
         if (editingKey === key) {
             clearEditState();

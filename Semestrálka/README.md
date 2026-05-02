@@ -1,24 +1,23 @@
 # Semestrálka Mission Briefing
 
-This is the browser version of the Mission Briefing app. It loads and saves POIs using a Firebase Realtime Database.
+This is the browser version of the Mission Briefing app. It loads and saves POIs through the backend API in `Semestrálka/backend`.
 
 ## Setup
 
-1. Open `Semestrálka/frontend/app.js`.
-2. Replace `https://YOUR_FIREBASE_DATABASE_URL/` with the base URL of your Firebase Realtime Database. Example:
-   ```js
-   const firebaseUrl = "https://your-project-id-default-rtdb.europe-west1.firebasedatabase.app/";
-   ```
-3. If your Firebase rules require authentication, also set `firebaseAuthToken` in `app.js`.
-4. Save the file.
+1. Set `FIREBASE_URL` to your Firebase Realtime Database base URL in the backend environment.
+2. Optionally set `FIREBASE_AUTH_TOKEN` if your database requires a REST auth token.
+3. Store login users under `users` in Firebase and POIs under `pois`.
+4. The backend then proxies login and POI operations through Firebase.
 
 ## Run locally
 
-From the `Semestrálka/frontend` directory, start a simple static server:
+Start the backend and use it to serve the frontend.
+
+Backend:
 
 ```bash
-cd /workspaces/TWA/Semestrálka/frontend
-python3 -m http.server 8000
+cd /workspaces/TWA/Semestrálka
+uvicorn backend.BEmain:app --reload --port 8000
 ```
 
 Then open this in your browser:
@@ -27,19 +26,28 @@ Then open this in your browser:
 http://127.0.0.1:8000
 ```
 
+
 ## Using the app
 
 - The browser page now requires login before you can view the map and add POIs.
-- Login credentials now come from `frontend/users.json`.
-- Example credentials are:
-  - username: `admin`
-  - password: `1234`
-- After login, the map displays POIs and shows markers on the map.
+- Login credentials are loaded from Firebase under the `users` path and validated by the backend `/login` endpoint.
+- Successful login generates a session token.
+- Middleware validates that token for all `/api/*` requests before allowing POI operations.
+- Example Firebase users data:
+  ```json
+  {
+    "users": [
+      {"username": "admin", "password": "1234"}
+    ],
+    "pois": {}
+  }
+  ```
+- After login, the map displays POIs from Firebase and shows markers on the map.
 - Use the form to add a new POI.
-- Existing POIs are shown in the list, and each list item now supports Modify/Delete.
+- Existing POIs are shown in the list, and each list item supports Modify/Delete.
 
 ## Notes
 
-- This implementation uses the Firebase Realtime Database REST API.
-- If your Firebase rules require authentication, you may need to permit read/write access during development or add auth headers.
+- This implementation stores both users and POIs in Firebase and proxies them through the backend.
+- The backend does not use local SQLite or local user files for login data.
 - The current Python `main.py` is a desktop PyQt app and is not required for browser use.

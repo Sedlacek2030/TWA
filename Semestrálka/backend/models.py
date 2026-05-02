@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float
-from Semestrálka.backend.db import Base
+from .db import Base
 
 class POI(Base):
     __tablename__ = "pois"
