@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Ondrejov Naves",
+        "lat": 49.9298972,
+        "lon": 14.761815,
+        "affiliation": "Friend"
+    },
+    {
+        "name": "Trebon Kaufland",
+        "lat": 49.0102478,
+        "lon": 14.7595172,
+        "affiliation": "Neutral"
+    },
+    {
+        "name": "Klatovy",
+        "lat": 49.3951942,
+        "lon": 13.2934669,
+        "affiliation": "Foe"
+    }
+]

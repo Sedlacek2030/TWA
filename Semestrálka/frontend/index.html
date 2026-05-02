@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mission Briefing</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 900px;
+            max-width: 960px;
             margin: 24px auto;
             padding: 0 16px;
             color: #222;
@@ -54,46 +55,85 @@
         .config {
             margin-bottom: 18px;
         }
+        #map {
+            width: 100%;
+            height: 420px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #app {
+            display: none;
+        }
+        #login-section {
+            margin-bottom: 24px;
+        }
+        .login-box {
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
     </style>
 </head>
 <body>
     <h1>Mission Briefing System</h1>
-    <p>Use the Firebase Realtime Database URL configured in <code>app.js</code> and then refresh this page.</p>
+    <section id="login-section">
+        <h2>Login Required</h2>
+        <div class="login-box">
+            <form id="login-form">
+                <div class="form-row">
+                    <label>Username <input id="login-user" placeholder="admin"></label>
+                </div>
+                <div class="form-row">
+                    <label>Password <input id="login-pass" type="password" placeholder="1234"></label>
+                </div>
+                <button type="submit">Log In</button>
+            </form>
+        </div>
+    </section>
 
     <div class="config">
         <strong>Firebase URL:</strong>
         <code id="firebase-url"></code>
     </div>
 
-    <section>
-        <h2>POIs</h2>
-        <div id="status"></div>
-        <div id="list"></div>
-    </section>
+    <div id="status"></div>
 
-    <section>
-        <h2>Add Point of Interest</h2>
-        <div class="form-row">
-            <label>Name <input id="name" placeholder="Name"></label>
-        </div>
-        <div class="form-row">
-            <label>Latitude <input id="lat" placeholder="Latitude"></label>
-        </div>
-        <div class="form-row">
-            <label>Longitude <input id="lon" placeholder="Longitude"></label>
-        </div>
-        <div class="form-row">
-            <label>Affiliation
-                <select id="affiliation">
-                    <option value="Friend">Friend</option>
-                    <option value="Neutral">Neutral</option>
-                    <option value="Foe">Foe</option>
-                </select>
-            </label>
-        </div>
-        <button onclick="addPoi()">Add POI</button>
-    </section>
+    <div id="app">
+        <div id="map"></div>
 
+        <section>
+            <h2>POIs</h2>
+            <div id="list"></div>
+        </section>
+
+        <section>
+            <h2>Add Point of Interest</h2>
+            <div class="form-row">
+                <label>Name <input id="name" placeholder="Name"></label>
+            </div>
+            <div class="form-row">
+                <label>Latitude <input id="lat" placeholder="Latitude"></label>
+            </div>
+            <div class="form-row">
+                <label>Longitude <input id="lon" placeholder="Longitude"></label>
+            </div>
+            <div class="form-row">
+                <label>Affiliation
+                    <select id="affiliation">
+                        <option value="Friend">Friend</option>
+                        <option value="Neutral">Neutral</option>
+                        <option value="Foe">Foe</option>
+                    </select>
+                </label>
+            </div>
+            <button id="add-poi-btn" type="button" onclick="addPoi()">Add POI</button>
+        </section>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

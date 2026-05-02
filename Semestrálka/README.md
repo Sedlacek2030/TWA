@@ -9,7 +9,8 @@ This is the browser version of the Mission Briefing app. It loads and saves POIs
    ```js
    const firebaseUrl = "https://your-project-id-default-rtdb.europe-west1.firebasedatabase.app/";
    ```
-3. Save the file.
+3. If your Firebase rules require authentication, also set `firebaseAuthToken` in `app.js`.
+4. Save the file.
 
 ## Run locally
 
@@ -28,7 +29,11 @@ http://127.0.0.1:8000
 
 ## Using the app
 
-- The page will load POIs from Firebase under the `pois` node.
+- The browser page now requires login before you can view the map and add POIs.
+- Default credentials are:
+  - username: `admin`
+  - password: `1234`
+- After login, the map displays POIs and shows markers on the map.
 - Use the form to add a new POI.
 - Existing POIs are shown in the list.
 
