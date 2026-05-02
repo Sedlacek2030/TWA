@@ -30,7 +30,8 @@ http://127.0.0.1:8000
 ## Using the app
 
 - The browser page now requires login before you can view the map and add POIs.
-- Default credentials are:
+- Login credentials now come from `frontend/users.json`.
+- Example credentials are:
   - username: `admin`
   - password: `1234`
 - After login, the map displays POIs and shows markers on the map.

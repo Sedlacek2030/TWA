@@ -1,7 +1,7 @@
 const firebaseUrl = "https://semestralka-9a2bd-default-rtdb.europe-west1.firebasedatabase.app/"; // Replace with your Firebase DB URL.
 const firebaseAuthToken = ""; // Optional: Firebase REST auth token if your rules require it.
-const validUsername = "admin";
-const validPassword = "1234";
+let validUsers = [];
+let userLoadError = false;
 
 const baseUrl = firebaseUrl.endsWith("/") ? firebaseUrl : firebaseUrl + "/";
 const statusEl = document.getElementById("status");
@@ -28,6 +28,22 @@ function setStatus(text, isError = false) {
 function buildFetchUrl(path) {
     if (!firebaseAuthToken) return `${baseUrl}${path}`;
     return `${baseUrl}${path}?auth=${encodeURIComponent(firebaseAuthToken)}`;
+}
+
+async function loadUsers() {
+    try {
+        const res = await fetch("users.json");
+        if (!res.ok) throw new Error(`users.json returned ${res.status}`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error("users.json must contain an array");
+        validUsers = data
+            .filter(u => u && typeof u.username === "string" && typeof u.password === "string")
+            .map(u => ({ username: u.username, password: u.password }));
+        if (validUsers.length === 0) throw new Error("users.json contains no valid users");
+    } catch (err) {
+        userLoadError = true;
+        setStatus(`Unable to load users.json: ${err.message}`, true);
+    }
 }
 
 function initMap() {
@@ -218,7 +234,13 @@ function handleLogin(event) {
     const username = document.getElementById("login-user").value.trim();
     const password = document.getElementById("login-pass").value;
 
-    if (username === validUsername && password === validPassword) {
+    if (userLoadError) {
+        setStatus("Cannot log in until users.json is loaded successfully.", true);
+        return;
+    }
+
+    const isValid = validUsers.some(user => user.username === username && user.password === password);
+    if (isValid) {
         setStatus("Login successful.");
         showApp();
     } else {
@@ -227,6 +249,8 @@ function handleLogin(event) {
 }
 
 loginForm.addEventListener("submit", handleLogin);
+
+loadUsers();
 
 async function deletePoi(key) {
     hideAllActionMenus();
