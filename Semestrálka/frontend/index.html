@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Briefing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 24px auto;
+            padding: 0 16px;
+            color: #222;
+        }
+        h1, h2 {
+            color: #0a3f66;
+        }
+        .form-row {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #0a3f66;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0d517f;
+        }
+        .poi-item {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fdfdfd;
+        }
+        #status {
+            margin-bottom: 12px;
+            min-height: 18px;
+        }
+        .config {
+            margin-bottom: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mission Briefing System</h1>
+    <p>Use the Firebase Realtime Database URL configured in <code>app.js</code> and then refresh this page.</p>
+
+    <div class="config">
+        <strong>Firebase URL:</strong>
+        <code id="firebase-url"></code>
+    </div>
+
+    <section>
+        <h2>POIs</h2>
+        <div id="status"></div>
+        <div id="list"></div>
+    </section>
+
+    <section>
+        <h2>Add Point of Interest</h2>
+        <div class="form-row">
+            <label>Name <input id="name" placeholder="Name"></label>
+        </div>
+        <div class="form-row">
+            <label>Latitude <input id="lat" placeholder="Latitude"></label>
+        </div>
+        <div class="form-row">
+            <label>Longitude <input id="lon" placeholder="Longitude"></label>
+        </div>
+        <div class="form-row">
+            <label>Affiliation
+                <select id="affiliation">
+                    <option value="Friend">Friend</option>
+                    <option value="Neutral">Neutral</option>
+                    <option value="Foe">Foe</option>
+                </select>
+            </label>
+        </div>
+        <button onclick="addPoi()">Add POI</button>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
