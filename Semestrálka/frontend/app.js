@@ -11,9 +11,12 @@ const loginSection = document.getElementById("login-section");
 const appSection = document.getElementById("app");
 const loginForm = document.getElementById("login-form");
 const addPoiBtn = document.getElementById("add-poi-btn");
+const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
 let map = null;
 let markersLayer = null;
+let editingKey = null;
+let poisByKey = {};
 
 firebaseUrlEl.textContent = baseUrl;
 
@@ -57,23 +60,57 @@ async function loadPOIs() {
     }
 }
 
+function hideAllActionMenus() {
+    document.querySelectorAll('.action-menu').forEach(menu => {
+        menu.style.display = 'none';
+    });
+}
+
+function toggleActions(key) {
+    hideAllActionMenus();
+    const menu = document.getElementById(`actions-${key}`);
+    if (!menu) return;
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+window.addEventListener('click', (event) => {
+    if (!event.target.closest('.poi-actions')) {
+        hideAllActionMenus();
+    }
+});
+
 function renderPOIs(data) {
     listEl.innerHTML = "";
     markersLayer.clearLayers();
 
-    const entries = data == null ? [] : Array.isArray(data) ? data : Object.values(data);
+    const entries = data == null ? [] : Array.isArray(data)
+        ? data.map((poi, index) => ({ ...poi, _key: String(index) }))
+        : Object.entries(data).map(([key, poi]) => ({ ...poi, _key: key }));
     if (entries.length === 0) {
         listEl.textContent = "No POIs found.";
         return;
     }
 
+    poisByKey = {};
     const bounds = [];
     entries.forEach(p => {
+        poisByKey[p._key] = p;
         const div = document.createElement("div");
         div.className = "poi-item";
         div.innerHTML = `
-            <strong>${p.name}</strong> <span>(${p.affiliation})</span><br>
-            [${p.lat}, ${p.lon}]
+            <div class="poi-header">
+                <div class="poi-text">
+                    <strong>${p.name}</strong> <span>(${p.affiliation})</span>
+                    <div class="poi-coords">[${p.lat}, ${p.lon}]</div>
+                </div>
+                <div class="poi-actions">
+                    <button class="action-btn" type="button" onclick="toggleActions('${p._key}')">⋮</button>
+                    <div class="action-menu" id="actions-${p._key}">
+                        <button type="button" onclick="startEditPoi('${p._key}')">Modify</button>
+                        <button type="button" onclick="deletePoi('${p._key}')">Delete</button>
+                    </div>
+                </div>
+            </div>
         `;
         listEl.appendChild(div);
 
@@ -112,27 +149,61 @@ async function addPoi() {
     }
 
     const poi = { name, lat, lon, affiliation };
-    setStatus("Saving POI...");
+    const method = editingKey ? "PATCH" : "POST";
+    const endpoint = editingKey ? `pois/${editingKey}.json` : "pois.json";
+    setStatus(editingKey ? "Updating POI..." : "Saving POI...");
 
     try {
-        const res = await fetch(buildFetchUrl("pois.json"), {
-            method: "POST",
+        const res = await fetch(buildFetchUrl(endpoint), {
+            method,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(poi)
         });
 
         if (!res.ok) throw new Error(`Firebase returned ${res.status}`);
 
+        const wasEditing = Boolean(editingKey);
+        clearEditState();
         document.getElementById("name").value = "";
         document.getElementById("lat").value = "";
         document.getElementById("lon").value = "";
         document.getElementById("affiliation").value = "Friend";
 
         await loadPOIs();
-        setStatus("Saved POI successfully.");
+        setStatus(wasEditing ? "Updated POI successfully." : "Saved POI successfully.");
     } catch (err) {
         setStatus(`Unable to save POI: ${err.message}`, true);
     }
+}
+
+function clearEditState() {
+    editingKey = null;
+    addPoiBtn.textContent = "Add POI";
+    cancelEditBtn.style.display = "none";
+}
+
+function startEditPoi(key) {
+    hideAllActionMenus();
+    const poi = poisByKey[key];
+    if (!poi) return;
+
+    document.getElementById("name").value = poi.name || "";
+    document.getElementById("lat").value = poi.lat || "";
+    document.getElementById("lon").value = poi.lon || "";
+    document.getElementById("affiliation").value = poi.affiliation || "Friend";
+    editingKey = key;
+    addPoiBtn.textContent = "Save Changes";
+    cancelEditBtn.style.display = "inline-flex";
+    setStatus(`Editing ${poi.name}.`);
+}
+
+function cancelEdit() {
+    clearEditState();
+    document.getElementById("name").value = "";
+    document.getElementById("lat").value = "";
+    document.getElementById("lon").value = "";
+    document.getElementById("affiliation").value = "Friend";
+    setStatus("Edit cancelled.");
 }
 
 function showApp() {
@@ -156,3 +227,24 @@ function handleLogin(event) {
 }
 
 loginForm.addEventListener("submit", handleLogin);
+
+async function deletePoi(key) {
+    hideAllActionMenus();
+    if (!confirm("Delete this POI?")) return;
+
+    try {
+        const res = await fetch(buildFetchUrl(`pois/${key}.json`), {
+            method: "DELETE"
+        });
+        if (!res.ok) throw new Error(`Firebase returned ${res.status}`);
+
+        if (editingKey === key) {
+            clearEditState();
+        }
+
+        await loadPOIs();
+        setStatus("Deleted POI successfully.");
+    } catch (err) {
+        setStatus(`Unable to delete POI: ${err.message}`, true);
+    }
+}

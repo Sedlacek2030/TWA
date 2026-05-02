@@ -35,7 +35,7 @@ http://127.0.0.1:8000
   - password: `1234`
 - After login, the map displays POIs and shows markers on the map.
 - Use the form to add a new POI.
-- Existing POIs are shown in the list.
+- Existing POIs are shown in the list, and each list item now supports Modify/Delete.
 
 ## Notes
 
