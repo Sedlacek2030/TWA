@@ -35,7 +35,16 @@
         <div id="map"></div>
 
         <section>
-            <h2>POIs</h2>
+            <div class="list-header">
+                <h2>POIs</h2>
+                <button id="filter-button" class="filter-button" type="button" onclick="toggleFilterMenu()" aria-label="Filter POIs">🔍</button>
+            </div>
+            <div id="filter-panel" class="filter-panel" style="display:none;">
+                <span>Map visibility:</span>
+                <label><input type="checkbox" checked onchange="toggleAffiliationFilter('Friend', this)"> Friend</label>
+                <label><input type="checkbox" checked onchange="toggleAffiliationFilter('Neutral', this)"> Neutral</label>
+                <label><input type="checkbox" checked onchange="toggleAffiliationFilter('Foe', this)"> Foe</label>
+            </div>
             <div id="list"></div>
         </section>
 

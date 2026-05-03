@@ -9,6 +9,8 @@ const appSection = document.getElementById("app");
 const loginForm = document.getElementById("login-form");
 const addPoiBtn = document.getElementById("add-poi-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
+const filterButton = document.getElementById("filter-button");
+const filterPanel = document.getElementById("filter-panel");
 
 backendUrlEl.textContent = backendUrl;
 
@@ -16,6 +18,9 @@ let map = null;
 let markersLayer = null;
 let editingKey = null;
 let poisByKey = {};
+let currentPois = [];
+const hiddenPOIs = new Set();
+const affiliationMapFilter = { Friend: true, Neutral: true, Foe: true };
 
 function setStatus(text, isError = false) {
     statusEl.textContent = text;
@@ -55,7 +60,8 @@ async function loadPOIs() {
         }
 
         const data = await res.json();
-        renderPOIs(data);
+        currentPois = Array.isArray(data) ? data : [];
+        renderPOIs(currentPois);
         setStatus("Loaded POIs from backend.");
     } catch (err) {
         setStatus(`Unable to load POIs: ${err.message}`, true);
@@ -76,9 +82,29 @@ function toggleActions(key) {
     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
 
+function toggleFilterMenu() {
+    if (!filterPanel) return;
+    filterPanel.style.display = filterPanel.style.display === 'block' ? 'none' : 'block';
+}
+
+function toggleAffiliationFilter(affiliation, input) {
+    affiliationMapFilter[affiliation] = Boolean(input.checked);
+    renderPOIs(currentPois);
+}
+
+function hidePoi(key) {
+    hideAllActionMenus();
+    hiddenPOIs.add(key);
+    setStatus('POI hidden.');
+    renderPOIs(currentPois);
+}
+
 window.addEventListener('click', (event) => {
-    if (!event.target.closest('.poi-actions')) {
+    if (!event.target.closest('.poi-actions') && !event.target.closest('#filter-panel') && !event.target.closest('#filter-button')) {
         hideAllActionMenus();
+        if (filterPanel) {
+            filterPanel.style.display = 'none';
+        }
     }
 });
 
@@ -96,10 +122,18 @@ function renderPOIs(data) {
 
     poisByKey = {};
     const bounds = [];
+    let visibleItems = 0;
+
     entries.forEach(p => {
         poisByKey[p._key] = p;
+        if (hiddenPOIs.has(p._key)) {
+            return;
+        }
+
+        const showOnMap = affiliationMapFilter[p.affiliation] ?? true;
         const div = document.createElement("div");
-        div.className = "poi-item";
+        const keyClass = `poi-${(p.affiliation || "Neutral").toLowerCase()}`;
+        div.className = `poi-item ${keyClass}${showOnMap ? "" : " map-hidden"}`;
         div.innerHTML = `
             <div class="poi-header">
                 <div class="poi-text">
@@ -109,17 +143,19 @@ function renderPOIs(data) {
                 <div class="poi-actions">
                     <button class="action-btn" type="button" onclick="toggleActions('${p._key}')">⋮</button>
                     <div class="action-menu" id="actions-${p._key}">
+                        <button type="button" onclick="hidePoi('${p._key}')">Hide</button>
                         <button type="button" onclick="startEditPoi('${p._key}')">Modify</button>
-                        <button type="button" onclick="deletePoi('${p._key}')">Delete</button>
+                        <button class="delete-btn" type="button" onclick="deletePoi('${p._key}')">Delete</button>
                     </div>
                 </div>
             </div>
         `;
         listEl.appendChild(div);
+        visibleItems += 1;
 
         const lat = Number(p.lat);
         const lon = Number(p.lon);
-        if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
+        if (!Number.isNaN(lat) && !Number.isNaN(lon) && showOnMap) {
             const iconName = (p.affiliation || "Neutral").toLowerCase();
             const iconUrl = `icons/${iconName}/default.png`;
             const poiIcon = L.icon({
@@ -135,10 +171,15 @@ function renderPOIs(data) {
         }
     });
 
+    if (visibleItems === 0) {
+        listEl.textContent = "No POIs found.";
+    }
+
     if (bounds.length) {
         map.fitBounds(bounds, { padding: [40, 40] });
     }
 }
+
 
 async function addPoi() {
     const name = document.getElementById("name").value.trim();

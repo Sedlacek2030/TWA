@@ -94,6 +94,71 @@ button:hover {
 .action-menu button:hover {
     background: #f2f6fb;
 }
+.action-menu button.delete-btn {
+    color: #b00;
+}
+.action-menu button.delete-btn:hover {
+    background: #f8d0d0;
+    color: #700;
+}
+.list-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.filter-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    background: transparent;
+    color: #0a3f66;
+    border: 1px solid #0a3f66;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+.filter-button:hover {
+    background: rgba(10, 63, 102, 0.08);
+}
+.filter-panel {
+    margin: 10px 0 14px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fafafa;
+}
+.filter-panel span {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+.filter-panel label {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 16px;
+    font-size: 0.95rem;
+}
+.filter-panel input {
+    margin-right: 6px;
+}
+.poi-friend {
+    background: rgba(211, 232, 255, 0.85);
+    border-color: #bdd9f3;
+}
+.poi-neutral {
+    background: rgba(255, 246, 205, 0.85);
+    border-color: #f0e4ae;
+}
+.poi-foe {
+    background: rgba(255, 224, 224, 0.9);
+    border-color: #f3c2c2;
+}
+.poi-item.map-hidden {
+    opacity: 0.92;
+}
 .secondary-btn {
     background: #656d7a;
     margin-left: 12px;
