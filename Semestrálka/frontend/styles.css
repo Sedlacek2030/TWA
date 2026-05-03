@@ -95,12 +95,12 @@ button:hover {
     background: #f2f6fb;
 }
 .action-menu button.delete-btn {
-    color: #b00;
-    background: rgba(255, 231, 231, 0.6);
+    color: #c62828;
+    background: transparent;
 }
 .action-menu button.delete-btn:hover {
     background: #f8d0d0;
-    color: #700;
+    color: #8b0000;
 }
 .list-header {
     display: flex;
@@ -150,25 +150,26 @@ button:hover {
 .filter-panel input {
     margin-right: 6px;
 }
-.poi-friend {
-    background: rgba(210, 232, 255, 0.92);
-    border-color: #9cc2ea;
-}
-.poi-neutral {
-    background: rgba(255, 249, 208, 0.92);
-    border-color: #e8dd90;
-}
-.poi-foe {
-    background: rgba(255, 223, 223, 0.92);
-    border-color: #e5b2b2;
-}
 .poi-item {
     border-width: 1px;
     border-style: solid;
 }
+.poi-friend {
+    background: rgba(210, 232, 255, 0.98);
+    border-color: #9cc2ea;
+}
+.poi-neutral {
+    background: rgba(255, 249, 208, 0.98);
+    border-color: #e8dd90;
+}
+.poi-foe {
+    background: rgba(255, 223, 223, 0.98);
+    border-color: #e5b2b2;
+}
 .poi-item.map-hidden {
     opacity: 0.88;
 }
+
 .secondary-btn {
     background: #656d7a;
     margin-left: 12px;

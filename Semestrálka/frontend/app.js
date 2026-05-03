@@ -22,6 +22,14 @@ let currentPois = [];
 const hiddenPOIs = new Set();
 const affiliationMapFilter = { Friend: true, Neutral: true, Foe: true };
 
+window.toggleFilterMenu = toggleFilterMenu;
+window.toggleAffiliationFilter = toggleAffiliationFilter;
+window.hidePoi = hidePoi;
+window.startEditPoi = startEditPoi;
+window.deletePoi = deletePoi;
+window.addPoi = addPoi;
+window.cancelEdit = cancelEdit;
+
 if (filterButton) {
     filterButton.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -106,8 +114,47 @@ function hidePoi(key) {
     renderPOIs(currentPois);
 }
 
+if (filterButton) {
+    filterButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleFilterMenu();
+    });
+}
+
+if (listEl) {
+    listEl.addEventListener('click', (event) => {
+        let target = event.target;
+        while (target && target.nodeType !== Node.ELEMENT_NODE) {
+            target = target.parentNode;
+        }
+        if (!(target instanceof Element)) return;
+
+        const actionButton = target.closest('.action-btn');
+        if (actionButton) {
+            const key = actionButton.dataset.key;
+            if (key) toggleActions(key);
+            return;
+        }
+
+        const menuButton = target.closest('[data-action]');
+        if (menuButton) {
+            const action = menuButton.dataset.action;
+            const key = menuButton.dataset.key;
+            if (!action || !key) return;
+            event.stopPropagation();
+            if (action === 'hide') hidePoi(key);
+            if (action === 'modify') startEditPoi(key);
+            if (action === 'delete') deletePoi(key);
+            return;
+        }
+    });
+}
+
 window.addEventListener('click', (event) => {
-    const target = event.target;
+    let target = event.target;
+    while (target && target.nodeType !== Node.ELEMENT_NODE) {
+        target = target.parentNode;
+    }
     if (!(target instanceof Element)) {
         return;
     }
@@ -152,11 +199,11 @@ function renderPOIs(data) {
                     <div class="poi-coords">[${p.lat}, ${p.lon}]</div>
                 </div>
                 <div class="poi-actions">
-                    <button class="action-btn" type="button" onclick="toggleActions('${p._key}')">⋮</button>
+                    <button class="action-btn" data-key="${p._key}" type="button">⋮</button>
                     <div class="action-menu" id="actions-${p._key}">
-                        <button type="button" onclick="hidePoi('${p._key}')">Hide</button>
-                        <button type="button" onclick="startEditPoi('${p._key}')">Modify</button>
-                        <button class="delete-btn" type="button" onclick="deletePoi('${p._key}')">Delete</button>
+                        <button type="button" data-action="hide" data-key="${p._key}">Hide</button>
+                        <button type="button" data-action="modify" data-key="${p._key}">Modify</button>
+                        <button class="delete-btn" type="button" data-action="delete" data-key="${p._key}">Delete</button>
                     </div>
                 </div>
             </div>
