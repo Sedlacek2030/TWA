@@ -1,0 +1,36 @@
+Semestrálka mission briefing app - how it functions
+
+Frontend:
+- `frontend/index.html` defines the login screen, map container, POI list, and add/edit form.
+- `frontend/app.js` handles login, loads POIs, renders map markers, and sends API requests.
+- The app uses Leaflet from CDN to display the map and marker icons.
+- After login, the UI shows the map and POI list.
+
+Backend:
+- `backend/BEmain.py` is the FastAPI application entry point.
+- `/login` checks credentials stored in Firebase and creates a session token.
+- `/api/pois` endpoints provide POI CRUD operations.
+- Requests to Firebase are made via REST calls to `FIREBASE_URL`.
+- The backend serves static frontend files from `frontend/` and icons from `backend/icons/`.
+
+Authentication:
+- `backend/sessions.py` creates and validates session tokens stored in memory.
+- Tokens expire after 24 hours.
+- `backend/middleware.py` protects `/api/*` routes by verifying the `x-token` header.
+
+Data flow:
+1. User enters credentials and submits the login form.
+2. Frontend sends `POST /login` to the backend.
+3. Backend fetches `users` from Firebase and validates the login.
+4. If valid, backend returns a session token.
+5. Frontend sends `x-token` with each `/api/pois` request.
+6. Middleware validates the token and allows POI requests.
+7. POI CRUD operations are proxied to Firebase.
+8. Frontend renders POIs on the list and map using icons by affiliation.
+
+Removed files:
+- `backend/db.py` and `backend/models.py` were unused local database files.
+- `backend/auth.py` contained an unused token constant.
+- `backend/users.json` was not used by the current Firebase-based backend.
+- `frontend/admin.html` and `frontend/admin.js` were an unused legacy admin UI.
+- `backend/__pycache__/` contained compiled Python cache files that are not needed.

@@ -1,53 +1,78 @@
 # Semestrálka Mission Briefing
 
-This is the browser version of the Mission Briefing app. It loads and saves POIs through the backend API in `Semestrálka/backend`.
+This is a browser-based Mission Briefing app with a FastAPI backend and a Leaflet map frontend.
+The app stores login users and POIs in Firebase and serves the frontend from the backend.
 
-## Setup
+## Contents
 
-1. Set `FIREBASE_URL` to your Firebase Realtime Database base URL in the backend environment.
-2. Optionally set `FIREBASE_AUTH_TOKEN` if your database requires a REST auth token.
-3. Store login users under `users` in Firebase and POIs under `pois`.
-4. The backend then proxies login and POI operations through Firebase.
+- `backend/BEmain.py` - FastAPI app, login endpoint, POI CRUD API, Firebase proxy, static file serving
+- `backend/middleware.py` - authentication middleware for `/api/*`
+- `backend/sessions.py` - ephemeral session token store and validation
+- `backend/icons/` - mission marker icons served by the backend
+- `frontend/index.html` - main UI, login form, POI form, map container
+- `frontend/app.js` - browser logic for login, POI listing, map rendering, add/edit/delete operations
 
-## Run locally
+## Requirements
 
-Start the backend and use it to serve the frontend.
+- Python 3.11+ (or compatible Python 3)
+- Install dependencies:
+  ```bash
+  pip install fastapi uvicorn
+  ```
+- Browser with internet access to load Leaflet from CDN
 
-Backend:
+## Environment
+
+Set these environment variables for the backend:
+
+- `FIREBASE_URL` - Firebase Realtime Database base URL
+- `FIREBASE_AUTH_TOKEN` - optional Firebase REST auth token if needed
+
+## Firebase data shape
+
+The backend expects Firebase data under these top-level paths:
+
+- `users` - login credentials as objects with `username` and `password`
+- `pois` - POI objects with `name`, `lat`, `lon`, and `affiliation`
+
+Example structure:
+```json
+{
+  "users": [
+    {"username": "admin", "password": "1234"}
+  ],
+  "pois": {
+    "poi1": {"name": "Alpha", "lat": 49.75, "lon": 15.33, "affiliation": "Friend"}
+  }
+}
+```
+
+## Running locally
+
+From the `Semestrálka` folder:
 
 ```bash
-cd /workspaces/TWA/Semestrálka
 uvicorn backend.BEmain:app --reload --port 8000
 ```
 
-Then open this in your browser:
+Then open:
 
-```
+```text
 http://127.0.0.1:8000
 ```
 
+## How it works
 
-## Using the app
-
-- The browser page now requires login before you can view the map and add POIs.
-- Login credentials are loaded from Firebase under the `users` path and validated by the backend `/login` endpoint.
-- Successful login generates a session token.
-- Middleware validates that token for all `/api/*` requests before allowing POI operations.
-- Example Firebase users data:
-  ```json
-  {
-    "users": [
-      {"username": "admin", "password": "1234"}
-    ],
-    "pois": {}
-  }
-  ```
-- After login, the map displays POIs from Firebase and shows markers on the map.
-- Use the form to add a new POI.
-- Existing POIs are shown in the list, and each list item supports Modify/Delete.
+1. The browser loads `frontend/index.html` and `frontend/app.js`.
+2. The user logs in using `/login`.
+3. The backend fetches Firebase `users`, validates credentials, and returns a session token.
+4. The browser includes `x-token` for requests to `/api/*`.
+5. Middleware checks the token before allowing POI CRUD operations.
+6. POI endpoints proxy `GET`, `POST`, `PUT`, and `DELETE` to Firebase under `pois`.
+7. Icons are served from `/icons/{affiliation}/default.png`.
 
 ## Notes
 
-- This implementation stores both users and POIs in Firebase and proxies them through the backend.
-- The backend does not use local SQLite or local user files for login data.
-- The current Python `main.py` is a desktop PyQt app and is not required for browser use.
+- The app does not use a local SQLite database.
+- Session tokens are stored in memory and expire after 24 hours.
+- Unused legacy files were removed from the project.

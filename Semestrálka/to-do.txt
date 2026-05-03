@@ -1,6 +1,7 @@
-redo README.txt
-write documentation
-clean up code
+hide POIs
+filter POIs
+color coded POI list
+"clear" button under Add POI
 remove IPs/addresses from websites
 add Hello + "username" after login
 maybe change UI
