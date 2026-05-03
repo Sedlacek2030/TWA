@@ -22,6 +22,13 @@ let currentPois = [];
 const hiddenPOIs = new Set();
 const affiliationMapFilter = { Friend: true, Neutral: true, Foe: true };
 
+if (filterButton) {
+    filterButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleFilterMenu();
+    });
+}
+
 function setStatus(text, isError = false) {
     statusEl.textContent = text;
     statusEl.style.color = isError ? "#b00" : "#080";
@@ -100,7 +107,11 @@ function hidePoi(key) {
 }
 
 window.addEventListener('click', (event) => {
-    if (!event.target.closest('.poi-actions') && !event.target.closest('#filter-panel') && !event.target.closest('#filter-button')) {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+        return;
+    }
+    if (!target.closest('.poi-actions') && !target.closest('#filter-panel') && !target.closest('#filter-button')) {
         hideAllActionMenus();
         if (filterPanel) {
             filterPanel.style.display = 'none';

@@ -96,6 +96,7 @@ button:hover {
 }
 .action-menu button.delete-btn {
     color: #b00;
+    background: rgba(255, 231, 231, 0.6);
 }
 .action-menu button.delete-btn:hover {
     background: #f8d0d0;
@@ -119,6 +120,11 @@ button:hover {
     padding: 6px 10px;
     cursor: pointer;
     font-size: 0.95rem;
+}
+.filter-button svg {
+    display: block;
+    width: 18px;
+    height: 18px;
 }
 .filter-button:hover {
     background: rgba(10, 63, 102, 0.08);
@@ -145,24 +151,29 @@ button:hover {
     margin-right: 6px;
 }
 .poi-friend {
-    background: rgba(211, 232, 255, 0.85);
-    border-color: #bdd9f3;
+    background: rgba(210, 232, 255, 0.92);
+    border-color: #9cc2ea;
 }
 .poi-neutral {
-    background: rgba(255, 246, 205, 0.85);
-    border-color: #f0e4ae;
+    background: rgba(255, 249, 208, 0.92);
+    border-color: #e8dd90;
 }
 .poi-foe {
-    background: rgba(255, 224, 224, 0.9);
-    border-color: #f3c2c2;
+    background: rgba(255, 223, 223, 0.92);
+    border-color: #e5b2b2;
+}
+.poi-item {
+    border-width: 1px;
+    border-style: solid;
 }
 .poi-item.map-hidden {
-    opacity: 0.92;
+    opacity: 0.88;
 }
 .secondary-btn {
     background: #656d7a;
     margin-left: 12px;
 }
+
 #status {
     margin-bottom: 12px;
     min-height: 18px;

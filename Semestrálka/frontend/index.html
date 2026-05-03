@@ -37,7 +37,11 @@
         <section>
             <div class="list-header">
                 <h2>POIs</h2>
-                <button id="filter-button" class="filter-button" type="button" onclick="toggleFilterMenu()" aria-label="Filter POIs">🔍</button>
+                <button id="filter-button" class="filter-button" type="button" onclick="toggleFilterMenu()" aria-label="Filter POIs">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="18" height="18">
+                        <path fill="currentColor" d="M3 4h18l-7 8.5V19l-4-2v-4.5L3 4z" />
+                    </svg>
+                </button>
             </div>
             <div id="filter-panel" class="filter-panel" style="display:none;">
                 <span>Map visibility:</span>
