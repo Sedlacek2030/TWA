@@ -56,6 +56,26 @@ button:hover {
 }
 .poi-actions {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.filter-hidden-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    color: #555;
+}
+.filter-hidden-icon svg {
+    width: 16px;
+    height: 16px;
+}
+.filter-hidden-icon:hover {
+    background: rgba(0, 0, 0, 0.1);
 }
 .action-btn {
     background: transparent;
@@ -129,6 +149,28 @@ button:hover {
 .filter-button:hover {
     background: rgba(10, 63, 102, 0.08);
 }
+.sort-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    background: transparent;
+    color: #0a3f66;
+    border: 1px solid #0a3f66;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+.sort-button.active {
+    background: rgba(10, 63, 102, 0.12);
+}
+.sort-button:hover {
+    background: rgba(10, 63, 102, 0.08);
+}
+.sort-button .sort-icon {
+    margin-right: 6px;
+}
 .filter-panel {
     margin: 10px 0 14px;
     padding: 10px;
@@ -146,6 +188,16 @@ button:hover {
     align-items: center;
     margin-right: 16px;
     font-size: 0.95rem;
+}
+.poi-group-header {
+    font-weight: 700;
+    padding: 10px 12px;
+    margin: 0 0 8px;
+    border-left: 4px solid #0a3f66;
+    background: rgba(10, 63, 102, 0.05);
+    color: #0a3f66;
+    border-radius: 6px;
+}
 }
 .filter-panel input {
     margin-right: 6px;
@@ -165,6 +217,21 @@ button:hover {
 .poi-foe {
     background: rgba(255, 223, 223, 0.98);
     border-color: #e5b2b2;
+}
+.hidden-poi {
+    opacity: 0.9;
+}
+.poi-hidden-note {
+    margin-top: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #8a3b3b;
+    font-size: 0.92rem;
+    font-style: italic;
+}
+.filter-hidden {
+    opacity: 0.96;
 }
 .poi-item.map-hidden {
     opacity: 0.88;

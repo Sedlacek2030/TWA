@@ -3,22 +3,24 @@ let token = null;
 
 const statusEl = document.getElementById("status");
 const listEl = document.getElementById("list");
-const backendUrlEl = document.getElementById("backend-url");
 const loginSection = document.getElementById("login-section");
 const appSection = document.getElementById("app");
 const loginForm = document.getElementById("login-form");
+const welcomeText = document.getElementById("welcome-text");
 const addPoiBtn = document.getElementById("add-poi-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const filterButton = document.getElementById("filter-button");
 const filterPanel = document.getElementById("filter-panel");
 
-backendUrlEl.textContent = backendUrl;
+console.log('Semestrálka frontend loaded');
+console.log('filterButton', filterButton);
 
 let map = null;
 let markersLayer = null;
 let editingKey = null;
 let poisByKey = {};
 let currentPois = [];
+const sortAffiliationOrder = ["Friend", "Neutral", "Foe"];
 const hiddenPOIs = new Set();
 const affiliationMapFilter = { Friend: true, Neutral: true, Foe: true };
 
@@ -109,16 +111,14 @@ function toggleAffiliationFilter(affiliation, input) {
 
 function hidePoi(key) {
     hideAllActionMenus();
-    hiddenPOIs.add(key);
-    setStatus('POI hidden.');
+    if (hiddenPOIs.has(key)) {
+        hiddenPOIs.delete(key);
+        setStatus('POI shown on map.');
+    } else {
+        hiddenPOIs.add(key);
+        setStatus('POI hidden from map.');
+    }
     renderPOIs(currentPois);
-}
-
-if (filterButton) {
-    filterButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        toggleFilterMenu();
-    });
 }
 
 if (listEl) {
@@ -173,6 +173,14 @@ function renderPOIs(data) {
     const entries = Array.isArray(data)
         ? data.map((poi) => ({ ...poi, _key: String(poi.id) }))
         : [];
+    entries.sort((a, b) => {
+        const aIndex = sortAffiliationOrder.indexOf(a.affiliation);
+        const bIndex = sortAffiliationOrder.indexOf(b.affiliation);
+        if (aIndex !== bIndex) {
+            return aIndex - bIndex;
+        }
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    });
     if (entries.length === 0) {
         listEl.textContent = "No POIs found.";
         return;
@@ -183,31 +191,63 @@ function renderPOIs(data) {
     let visibleItems = 0;
 
     entries.forEach(p => {
-        poisByKey[p._key] = p;
-        if (hiddenPOIs.has(p._key)) {
-            return;
-        }
+            poisByKey[p._key] = p;
 
-        const showOnMap = affiliationMapFilter[p.affiliation] ?? true;
-        const div = document.createElement("div");
-        const keyClass = `poi-${(p.affiliation || "Neutral").toLowerCase()}`;
-        div.className = `poi-item ${keyClass}${showOnMap ? "" : " map-hidden"}`;
-        div.innerHTML = `
-            <div class="poi-header">
-                <div class="poi-text">
-                    <strong>${p.name}</strong> <span>(${p.affiliation})</span>
-                    <div class="poi-coords">[${p.lat}, ${p.lon}]</div>
-                </div>
-                <div class="poi-actions">
-                    <button class="action-btn" data-key="${p._key}" type="button">⋮</button>
-                    <div class="action-menu" id="actions-${p._key}">
-                        <button type="button" data-action="hide" data-key="${p._key}">Hide</button>
-                        <button type="button" data-action="modify" data-key="${p._key}">Modify</button>
-                        <button class="delete-btn" type="button" data-action="delete" data-key="${p._key}">Delete</button>
+            const isHidden = hiddenPOIs.has(p._key);
+            const isFilteredHidden = !(affiliationMapFilter[p.affiliation] ?? true);
+            const showOnMap = !isFilteredHidden && !isHidden;
+            const div = document.createElement("div");
+            const keyClass = `poi-${(p.affiliation || "Neutral").toLowerCase()}`;
+            div.className = `poi-item ${keyClass}${isHidden ? " hidden-poi" : ""}${isFilteredHidden ? " filter-hidden" : ""}${showOnMap ? "" : " map-hidden"}`;
+            div.innerHTML = `
+                <div class="poi-header">
+                    <div class="poi-text">
+                        <strong>${p.name}</strong> <span>(${p.affiliation})</span>
+                        <div class="poi-coords">[${p.lat}, ${p.lon}]</div>
+                        ${isHidden ? '<div class="poi-hidden-note">Hidden from map</div>' : ''}
+                    </div>
+                    <div class="poi-actions">
+                        ${isFilteredHidden ? '<span class="filter-hidden-icon" title="Hidden by filter"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-4.97 0-9-3.58-9-8 0-1.72.53-3.33 1.44-4.67"/><path d="M6.6 6.6A9.96 9.96 0 0 1 12 5c4.97 0 9 3.58 9 8 0 1.38-.35 2.69-.96 3.83"/><path d="M1 1l22 22"/></svg></span>' : ''}
+                        <button class="action-btn" type="button">⋮</button>
+                        <div class="action-menu" id="actions-${p._key}">
+                            <button type="button" class="hide-btn">${isHidden ? 'Show' : 'Hide'}</button>
+                            <button type="button" class="modify-btn">Modify</button>
+                            <button class="delete-btn" type="button">Delete</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+        const actionBtn = div.querySelector('.action-btn');
+        const actionMenu = div.querySelector('.action-menu');
+        const hideBtn = div.querySelector('.hide-btn');
+        const modifyBtn = div.querySelector('.modify-btn');
+        const deleteBtn = div.querySelector('.delete-btn');
+
+        if (actionBtn && actionMenu) {
+            actionBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                actionMenu.style.display = actionMenu.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+        if (hideBtn) {
+            hideBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                hidePoi(p._key);
+            });
+        }
+        if (modifyBtn) {
+            modifyBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                startEditPoi(p._key);
+            });
+        }
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                deletePoi(p._key);
+            });
+        }
+
         listEl.appendChild(div);
         visibleItems += 1;
 
@@ -311,6 +351,9 @@ function cancelEdit() {
 function showApp() {
     loginSection.style.display = "none";
     appSection.style.display = "block";
+    if (welcomeText) {
+        welcomeText.style.display = 'block';
+    }
     initMap();
     loadPOIs();
 }
@@ -331,6 +374,10 @@ async function handleLogin(event) {
         if (res.ok && data.token) {
             token = data.token;
             setStatus("Login successful.");
+            if (welcomeText) {
+                welcomeText.textContent = `Welcome, ${username}!`;
+                welcomeText.style.display = 'block';
+            }
             showApp();
         } else {
             setStatus(data.error || "Invalid login credentials.", true);

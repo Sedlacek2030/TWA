@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mission Briefing</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
     <h1>Mission Briefing System</h1>
+    <div id="welcome-text" class="welcome-text" style="display:none;"></div>
     <section id="login-section">
         <h2>Login Required</h2>
         <div class="login-box">
@@ -24,11 +25,6 @@
         </div>
     </section>
 
-    <div class="config">
-        <strong>Backend URL:</strong>
-        <code id="backend-url"></code>
-    </div>
-
     <div id="status"></div>
 
     <div id="app">
@@ -37,7 +33,7 @@
         <section>
             <div class="list-header">
                 <h2>POIs</h2>
-                <button id="filter-button" class="filter-button" type="button" onclick="toggleFilterMenu()" aria-label="Filter POIs">
+                <button id="filter-button" class="filter-button" type="button" aria-label="Filter POIs">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="18" height="18">
                         <path fill="currentColor" d="M3 4h18l-7 8.5V19l-4-2v-4.5L3 4z" />
                     </svg>
@@ -78,6 +74,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=3"></script>
 </body>
 </html>
