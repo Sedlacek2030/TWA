@@ -79,7 +79,7 @@ async function loadPOIs() {
         const data = await res.json();
         currentPois = Array.isArray(data) ? data : [];
         renderPOIs(currentPois);
-        setStatus("Loaded POIs from backend.");
+        setStatus("Loaded POIs from database.");
     } catch (err) {
         setStatus(`Unable to load POIs: ${err.message}`, true);
         listEl.innerHTML = "";
