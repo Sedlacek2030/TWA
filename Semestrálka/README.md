@@ -73,6 +73,4 @@ http://127.0.0.1:8000
 
 ## Notes
 
-- The app does not use a local SQLite database.
 - Session tokens are stored in memory and expire after 24 hours.
-- Unused legacy files were removed from the project.
