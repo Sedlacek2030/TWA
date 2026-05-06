@@ -26,7 +26,7 @@ FIREBASE_URL = os.environ.get(
 )
 
 # Optional auth token for Firebase requests (if required by rules)
-FIREBASE_AUTH_TOKEN = os.environ.get("FIREBASE_AUTH_TOKEN", "")
+FIREBASE_AUTH_TOKEN = os.environ.get("FIREBASE_AUTH_TOKEN", "HOWTEI5KFbNOSZ8VAIzD8Dc8IHPftoGjHQObb26H")
 
 # Normalize URL (remove trailing slash if present)
 if FIREBASE_URL.endswith("/"):
